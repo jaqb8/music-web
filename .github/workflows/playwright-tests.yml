@@ -1,6 +1,9 @@
 name: End-to-end tests
 run-name: Playwright tests triggered on ${{ github.event_name }} 🚀
 on: [push]
+env:
+  PUBLIC_SUPABASE_URL: ${{ secrects.PUBLIC_SUPABASE_URL }}
+  PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}
 jobs:
   Playwright-Tests:
     runs-on: ubuntu-latest
