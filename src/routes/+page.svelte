@@ -29,7 +29,7 @@
 			<button type="submit" class="btn btn-primary">Logout</button>
 		</form>
 	{:else}
-		<a href="/login" class="button">Login</a>
+		<a href="/register" class="button">Login</a>
 		<a href="/register" class="button">Register</a>
 	{/if}
 </main>
