@@ -1,0 +1,9 @@
+.git
+.svelte-kit
+build
+node_modules
+.dockerignore
+.gitignore
+Dockerfile
+README.md
+playwright-report
