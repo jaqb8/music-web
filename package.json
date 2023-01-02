@@ -38,6 +38,7 @@
 		"@supabase/auth-helpers-sveltekit": "^0.8.6",
 		"@supabase/supabase-js": "^2.2.1",
 		"dotenv": "^16.0.3",
+		"dotenv-vault-core": "^0.6.1",
 		"svelte-french-toast": "^1.0.3"
 	}
 }

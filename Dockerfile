@@ -4,7 +4,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
-RUN npm run build && npm prune --production
+RUN npm run check && npm run build && npm prune --production
 
 FROM node:current-alpine3.17
 USER node:node
