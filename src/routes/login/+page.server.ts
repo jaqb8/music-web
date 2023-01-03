@@ -1,7 +1,7 @@
 import { AuthApiError } from '@supabase/supabase-js';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import type { LoginForm } from './types';
+import type { LoginForm } from '$lib/types';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	if (locals.session?.user) {

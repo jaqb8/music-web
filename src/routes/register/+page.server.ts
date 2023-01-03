@@ -1,3 +1,4 @@
+import type { RegisterForm } from '$lib/types';
 import { AuthApiError } from '@supabase/supabase-js';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
@@ -10,13 +11,9 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 export const actions: Actions = {
 	register: async ({ request, locals }) => {
-		const formData = await request.formData();
-		const body = {
-			email: formData.get('email')?.toString() || '',
-			password: formData.get('password')?.toString() || ''
-		};
+		const { email, password } = Object.fromEntries(await request.formData()) as RegisterForm;
 
-		const { error: err } = await locals.sb.auth.signUp(body);
+		const { error: err } = await locals.sb.auth.signUp({ email, password });
 
 		if (err) {
 			if (err instanceof AuthApiError && err.status === 422) {
