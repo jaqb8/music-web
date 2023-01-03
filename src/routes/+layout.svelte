@@ -1,4 +1,5 @@
 <script lang="ts">
+	import '../app.css';
 	import { supabaseClient } from '$lib/supabase';
 	import { invalidateAll } from '$app/navigation';
 	import { onMount } from 'svelte';
@@ -16,6 +17,9 @@
 	});
 </script>
 
-<div class="container">
+<div>
+	<div class="navbar bg-primary">
+		<a href="/" class="btn btn-ghost normal-case text-xl text-white">Music Web</a>
+	</div>
 	<slot />
 </div>
