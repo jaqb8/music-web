@@ -1,11 +1,11 @@
 <script lang="ts">
 	import type { SubmitFunction } from '$app/forms';
 	import { Hero, Card, Form, FormInput, SubmitButton } from '$lib/components';
-	import type { RegisterForm } from '$lib/types';
+	import type { RegisterFormData } from '$lib/types';
 	import toast, { Toaster } from 'svelte-french-toast';
 
 	const submitRegister: SubmitFunction = ({ data, cancel }) => {
-		const { email, password } = Object.fromEntries(data) as RegisterForm;
+		const { email, password } = Object.fromEntries(data) as RegisterFormData;
 
 		if (email.length === 0 || password.length === 0) {
 			toast.error('Enter email and password');
