@@ -7,7 +7,7 @@ vi.mock('$app/forms', async () => {
 	const mod = await vi.importActual<any>('$app/forms');
 	return {
 		...mod,
-		applyAction: vi.fn()
+		applyAction: vi.fn(() => true)
 	};
 });
 
