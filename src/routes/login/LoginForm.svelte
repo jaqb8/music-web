@@ -3,15 +3,13 @@
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import { Toaster } from 'svelte-french-toast';
 
-	let emailValue: string;
-	let passwordValue: string;
-	export let submitFunction: SubmitFunction | undefined;
+	export let submitFunction: SubmitFunction | undefined = undefined;
 </script>
 
 <Toaster />
 <Form actionName="login" {submitFunction}>
-	<FormInput name="email" type="email" bind:value={emailValue} />
-	<FormInput name="password" type="password" bind:value={passwordValue} />
+	<FormInput name="email" type="email" />
+	<FormInput name="password" type="password" />
 	<label for="forgot-password" class="label">
 		<a href="#!" id="forgot-password" class="label-text-alt link link-hover">Forgot password?</a>
 	</label>

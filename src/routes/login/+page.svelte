@@ -1,25 +1,7 @@
-<script lang="ts">
+<script lang="ts" context="module">
 	import { Hero, Card } from '$lib/components';
 	import LoginForm from './LoginForm.svelte';
-	import type { SubmitFunction } from '@sveltejs/kit';
-	import type { LoginFormData } from '$lib/types';
-	import toast from 'svelte-french-toast';
-
-	const submitLogin: SubmitFunction = ({ data, cancel }) => {
-		const { email, password } = Object.fromEntries(data) as LoginFormData;
-
-		if (email.length === 0 || password.length === 0) {
-			toast.error('Enter email and password');
-			cancel();
-		}
-
-		return async ({ result, update }) => {
-			if (result.type === 'failure' && result.data) {
-				toast.error(result.data.error);
-			}
-			await update();
-		};
-	};
+	import { submitForm } from '$lib/submitForm';
 </script>
 
 <main>
@@ -32,7 +14,7 @@
 			</p>
 		</div>
 		<Card>
-			<LoginForm submitFunction={submitLogin} />
+			<LoginForm submitFunction={submitForm} />
 		</Card>
 	</Hero>
 </main>

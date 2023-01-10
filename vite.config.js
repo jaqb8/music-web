@@ -6,7 +6,9 @@ const config = {
 	test: {
 		include: ['src/**/*.{test,spec}.{js,ts}'],
 		environment: 'jsdom',
-		globals: true
+		globals: true,
+		mockReset: true,
+		clearMocks: true
 	}
 };
 

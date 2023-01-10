@@ -16,9 +16,14 @@ export const actions: Actions = {
 		const { error: err } = await locals.sb.auth.signUp({ email, password });
 
 		if (err) {
+			console.log(err);
 			if (err instanceof AuthApiError && err.status === 422) {
 				return fail(422, {
-					error: 'Invalid email or password'
+					error: err.message
+				});
+			} else if (err instanceof AuthApiError && err.status === 400) {
+				return fail(400, {
+					error: err.message
 				});
 			}
 			return fail(500, {

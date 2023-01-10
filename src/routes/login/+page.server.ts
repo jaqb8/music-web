@@ -22,7 +22,7 @@ export const actions: Actions = {
 			console.log(err);
 			if (err instanceof AuthApiError && err.status === 400) {
 				return fail(400, {
-					error: 'Invalid email or password'
+					error: err.message
 				});
 			}
 			return fail(500, {
