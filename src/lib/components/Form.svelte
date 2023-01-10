@@ -5,7 +5,9 @@
 	export let submitFunction: SubmitFunction | undefined = undefined;
 
 	const formEnhance = (form: HTMLFormElement) => {
-		submitFunction && enhance(form, submitFunction);
+		if (submitFunction) {
+			enhance(form, submitFunction);
+		}
 	};
 </script>
 

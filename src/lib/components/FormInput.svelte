@@ -1,6 +1,6 @@
 <script lang="ts">
 	export let name: string;
-	export let inputType: string;
+	export let type: string;
 
 	$: labelName = name.charAt(0).toUpperCase() + name.slice(1);
 </script>
@@ -9,5 +9,5 @@
 	<label for={name} class="label">
 		<span class="label-text">{labelName}</span>
 	</label>
-	<input {name} id={name} type={inputType} placeholder={name} class="input input-bordered" />
+	<input {type} {name} id={name} placeholder={name} class="input input-bordered" />
 </div>
