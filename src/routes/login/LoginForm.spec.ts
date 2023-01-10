@@ -3,11 +3,12 @@ import { render, fireEvent } from '@testing-library/svelte';
 import LoginForm from './LoginForm.svelte';
 import { vi } from 'vitest';
 
-vi.mock('$app/forms', async () => {
-	const mod = await vi.importActual<any>('$app/forms');
+vi.mock("('$app/forms').enhance", async () => {
+	const mod = await vi.importActual<any>("('$app/forms').enhance");
 	return {
 		...mod,
-		applyAction: vi.fn(() => true)
+		fallback_callback: vi.fn(() => console.log(111))
+		// enhance: vi.fn(() => true)
 	};
 });
 
