@@ -1,4 +1,5 @@
 name: Unit Tests
+run-name: Unit tests triggered on ${{ github.event_name }} 🧪
 
 on:
   push:
