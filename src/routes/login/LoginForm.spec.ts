@@ -3,6 +3,14 @@ import { render, fireEvent } from '@testing-library/svelte';
 import LoginForm from './LoginForm.svelte';
 import { vi } from 'vitest';
 
+vi.mock('$app/forms', async () => {
+	const mod = await vi.importActual<any>('$app/forms');
+	return {
+		...mod,
+		applyAction: vi.fn()
+	};
+});
+
 describe('<LoginForm />', () => {
 	it.each`
 		email              | expected
