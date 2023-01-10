@@ -3,14 +3,14 @@ import { vi } from 'vitest';
 import { render, fireEvent } from '@testing-library/svelte';
 import RegisterForm from './RegisterForm.svelte';
 
-vi.mock("('$app/forms').enhance", async () => {
-	const mod = await vi.importActual<any>("('$app/forms').enhance");
-	return {
-		...mod,
-		fallback_callback: vi.fn(() => console.log(111))
-		// enhance: vi.fn(() => true)
-	};
-});
+// vi.mock("('$app/forms').enhance", async () => {
+// 	const mod = await vi.importActual<any>("('$app/forms').enhance");
+// 	return {
+// 		...mod,
+// 		fallback_callback: vi.fn(() => console.log(111))
+// 		// enhance: vi.fn(() => true)
+// 	};
+// });
 
 describe('<RegisterForm />', () => {
 	it.each`
@@ -18,7 +18,7 @@ describe('<RegisterForm />', () => {
 		${'test@test.com'} | ${1}
 		${'invalid email'} | ${0}
 	`('should call submit function $expected times on submit', async ({ email, expected }) => {
-		const submitFunction = vi.fn();
+		const submitFunction = vi.fn().mockResolvedValue(() => 'submitted');
 		const { getByLabelText, getByText } = render(RegisterForm as any, {
 			submitFunction
 		});
