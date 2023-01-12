@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Hero, Card } from '$lib/components';
 	import RegisterForm from './RegisterForm.svelte';
-	import { submitForm } from '$lib/submitForm';
+	import { submitForm } from '$lib/shared';
 </script>
 
 <main>
