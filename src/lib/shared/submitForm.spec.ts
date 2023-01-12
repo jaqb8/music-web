@@ -1,4 +1,4 @@
-import { submitForm } from './submitForm';
+import submitForm from './submitForm';
 import { vi } from 'vitest';
 import toast from 'svelte-french-toast';
 

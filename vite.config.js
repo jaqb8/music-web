@@ -8,7 +8,8 @@ const config = {
 		environment: 'jsdom',
 		globals: true,
 		mockReset: true,
-		clearMocks: true
+		clearMocks: true,
+		restoreMocks: true
 	}
 };
 
