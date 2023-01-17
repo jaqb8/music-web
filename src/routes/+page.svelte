@@ -22,24 +22,30 @@
 </svelte:head>
 
 <main>
-	<div class="hero min-h-screen bg-base-200">
-		<div class="hero-content text-center">
-			<div class="max-w-md">
-				<h1 class="text-5xl font-bold">Music Web</h1>
-				<p class="py-6">
-					Provident cupiditate voluptatem et in. Quaerat fugiat ut assumenda excepturi
-					exercitationem quasi. In deleniti eaque aut repudiandae et a id nisi.
-				</p>
-				{#if data.session}
-					<p>Welcome, {data.session.user.email}!</p>
-					<form action="/logout" method="POST" use:enhance={submitLogout}>
-						<button type="submit" class="btn btn-primary">Logout</button>
-					</form>
-				{:else}
-					<a href="/login" class="btn btn-primary">Login</a>
-					<a href="/register" class="btn btn-primary">Register</a>
-				{/if}
-			</div>
-		</div>
+	<div class="my-10 text-center">
+		<h1 class="text-5xl font-bold">Music Web</h1>
 	</div>
+	<div class="grid grid-cols-3 gap-4 my-10 text-center">
+		{#each data.albums.items as album}
+			<div class="card w-96 glass">
+				<figure><img src={album.images.at(0)?.url} alt="car!" /></figure>
+				<div class="card-body">
+					<h2 class="card-title">{album.name}</h2>
+					<p>{album.artists.map((artist) => artist.name).join(', ')}</p>
+					<div class="card-actions justify-end">
+						<button class="btn btn-primary">Learn now!</button>
+					</div>
+				</div>
+			</div>
+		{/each}
+	</div>
+	{#if data.session}
+		<p>Welcome, {data.session.user.email}!</p>
+		<form action="/logout" method="POST" use:enhance={submitLogout}>
+			<button type="submit" class="btn btn-primary">Logout</button>
+		</form>
+	{:else}
+		<a href="/login" class="btn btn-primary">Login</a>
+		<a href="/register" class="btn btn-primary">Register</a>
+	{/if}
 </main>
