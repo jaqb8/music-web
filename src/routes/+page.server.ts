@@ -1,7 +1,6 @@
-import { spotifyApi } from '$lib/server/spotify';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async () => {
-	const result = await spotifyApi.getNewReleases();
+export const load: PageServerLoad = async ({ locals }) => {
+	const result = await locals.spotifyClient.getNewReleases();
 	return result.body;
 };
