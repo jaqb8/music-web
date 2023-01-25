@@ -57,7 +57,7 @@ export class SpotifyApi extends SpotifyWebApi {
 		}
 	}
 
-	setToken(spotifyToken: SpotifyToken): void {
+	private setToken(spotifyToken: SpotifyToken): void {
 		this.setAccessToken(spotifyToken.accessToken);
 		this.token = spotifyToken;
 	}
