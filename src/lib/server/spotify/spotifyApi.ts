@@ -35,14 +35,16 @@ export class SpotifyApi extends SpotifyWebApi {
 
 	public async renewAccessToken(): Promise<Result<ResponseBody, Error>> {
 		try {
-			const response = await this.clientCredentialsGrant();
+			const {
+				body: { access_token, expires_in, token_type }
+			} = await this.clientCredentialsGrant();
 
 			const token: SpotifyToken = {
-				accessToken: response.body.access_token,
-				expiresIn: response.body.expires_in,
-				tokenType: response.body.token_type,
+				accessToken: access_token,
+				expiresIn: expires_in,
+				tokenType: token_type,
 				issuedAt: dayjs().format(),
-				expiresAt: dayjs().add(response.body['expires_in'], 'second').format()
+				expiresAt: dayjs().add(expires_in, 'second').format()
 			};
 
 			this.setToken(token);
