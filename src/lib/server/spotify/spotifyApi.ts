@@ -14,19 +14,25 @@ type SpotifyToken = {
 
 export class SpotifyApi extends SpotifyWebApi {
 	token?: SpotifyToken;
+	private static instance: SpotifyApi;
 
-	static async createClient(credentials: Record<string, string | undefined>): Promise<SpotifyApi> {
-		const instance = new SpotifyApi(credentials);
-		if (!instance.getAccessToken()) {
-			const result = await instance.renewAccessToken();
-			result
-				.map((response) => console.log('createClient()', response))
-				.mapErr((err) => console.error('createClient()', err));
-		}
-		return instance;
+	private constructor(credentials: Record<string, string | undefined>) {
+		super(credentials);
 	}
 
-	async renewAccessToken(): Promise<Result<ResponseBody, Error>> {
+	static async getInstance(credentials: Record<string, string | undefined>): Promise<SpotifyApi> {
+		if (!SpotifyApi.instance) {
+			SpotifyApi.instance = new SpotifyApi(credentials);
+			const result = await SpotifyApi.instance.renewAccessToken();
+			result
+				.map((response) => console.log('SpotifyApi', response))
+				.mapErr((err) => console.error('SpotifyApi', err));
+		}
+
+		return SpotifyApi.instance;
+	}
+
+	public async renewAccessToken(): Promise<Result<ResponseBody, Error>> {
 		try {
 			const response = await this.clientCredentialsGrant();
 
