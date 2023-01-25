@@ -19,9 +19,18 @@
 </script>
 
 <Toaster />
-<div>
+<div class="bg-base-200">
 	<div class="navbar bg-primary">
-		<a href="/" class="btn btn-ghost normal-case text-xl text-white">Music Web</a>
+		<div class="flex-none">
+			<a href="/" class="btn btn-ghost normal-case text-xl text-white">Music Web</a>
+		</div>
+		<div class="flex-grow">
+			<div class="form-control">
+				<input type="text" placeholder="Search" class="input input-bordered" />
+			</div>
+		</div>
 	</div>
-	<slot />
+	<div class="container mx-auto">
+		<slot />
+	</div>
 </div>

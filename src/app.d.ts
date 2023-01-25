@@ -4,6 +4,7 @@
 
 import type { TypedSupabaseClient } from '@supabase/auth-helpers-sveltekit/dist/types';
 import type { Session } from '@supabase/supabase-js';
+import type { SpotifyClient } from '$lib/server/spotify';
 
 declare global {
 	declare namespace App {
@@ -11,6 +12,7 @@ declare global {
 		interface Locals {
 			sb: TypedSupabaseClient;
 			session: Session | null;
+			spotifyClient: SpotifyClient;
 		}
 		interface PageData {
 			session: import('@supabase/supabase-js').Session | null;
