@@ -29,6 +29,7 @@ export class SpotifyApi extends SpotifyWebApi {
 				.mapErr((err) => console.error('SpotifyApi', err));
 		}
 
+		SpotifyApi.instance.setCredentials(credentials);
 		return SpotifyApi.instance;
 	}
 
