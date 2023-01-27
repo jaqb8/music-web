@@ -2,6 +2,9 @@
 	import { Hero, Card } from '$lib/components';
 	import LoginForm from './LoginForm.svelte';
 	import { submitForm } from '$lib/shared';
+	import type { ActionData } from './$types';
+
+	export let form: ActionData;
 </script>
 
 <main>
@@ -14,7 +17,7 @@
 			</p>
 		</div>
 		<Card>
-			<LoginForm submitFunction={submitForm} />
+			<LoginForm submitFunction={submitForm} {form} />
 		</Card>
 	</Hero>
 </main>
