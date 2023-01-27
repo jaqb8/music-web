@@ -4,6 +4,6 @@
 	export let disabled = false;
 </script>
 
-<div class="form-control mt-4">
+<div class="form-control mt-2">
 	<button class="btn btn-{style}" {disabled}>{text}</button>
 </div>
