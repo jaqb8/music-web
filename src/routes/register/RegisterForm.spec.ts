@@ -1,12 +1,15 @@
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
-import { render, fireEvent } from '@testing-library/svelte';
+import { render, fireEvent, getByRole, screen } from '@testing-library/svelte';
 import RegisterForm from './RegisterForm.svelte';
 import { loading } from '$lib/stores';
+import { page } from '$app/stores';
 import { tick } from 'svelte';
 
 vi.mock('$lib/stores', async () => await vi.importActual('$lib/stores'));
+vi.mock('$app/stores', async () => await vi.importActual('$app/stores'));
 const loadingMocked = vi.mocked(loading);
+const pageMocked = vi.mocked(page);
 
 describe('<RegisterForm />', () => {
 	it.each`
@@ -16,7 +19,8 @@ describe('<RegisterForm />', () => {
 	`('should call submit function $expected times on submit', async ({ email, expected }) => {
 		const submitFunction = vi.fn().mockResolvedValue(() => 'submitted');
 		const { getByLabelText, getByText } = render(RegisterForm as any, {
-			submitFunction
+			submitFunction,
+			form: {}
 		});
 
 		const emailField = getByLabelText('Email');
@@ -40,7 +44,9 @@ describe('<RegisterForm />', () => {
 	});
 
 	it('should disable submit button when component is loading', async () => {
-		const { getByText } = render(RegisterForm as any);
+		const { getByText } = render(RegisterForm as any, {
+			form: {}
+		});
 		const submitButton = getByText('register');
 
 		loadingMocked.set(true);
@@ -50,12 +56,43 @@ describe('<RegisterForm />', () => {
 	});
 
 	it('should enable submit button when component is not loading', async () => {
-		const { getByText } = render(RegisterForm as any);
+		const { getByText } = render(RegisterForm as any, {
+			form: {}
+		});
 		const submitButton = getByText('register');
 
 		loadingMocked.set(false);
 		await tick();
 
 		expect(submitButton).toBeEnabled();
+	});
+
+	it('should dispay form errors', async () => {
+		const { getByText } = render(RegisterForm as any, {
+			form: {
+				errors: {
+					email: ['Email is required'],
+					password: ['Password must be at least 6 characters'],
+					passwordConfirm: ['Password must be at least 6 characters'],
+					terms: ['Terms and Conditions must be accepted']
+				}
+			}
+		});
+
+		screen.getByText('Email is required');
+		const passwordErrors = screen.getAllByText('Password must be at least 6 characters');
+		expect(passwordErrors.length).toEqual(2);
+		screen.getByText('Terms and Conditions must be accepted');
+	});
+
+	it('should display form alert', () => {
+		const { getByText } = render(RegisterForm as any, {
+			form: {
+				error: 'User already exists'
+			}
+		});
+
+		const alertDiv = screen.getByRole('alert');
+		expect(alertDiv.innerHTML).toMatch(/User already exists/);
 	});
 });
