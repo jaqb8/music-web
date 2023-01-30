@@ -1,5 +1,9 @@
 import { SpotifyApi } from './spotifyApi';
-import { env } from '$env/dynamic/private';
+import {
+	SPOTIFY_CLIENT_ID,
+	SPOTIFY_CLIENT_SECRET,
+	SPOTIFY_REDIRECT_URI
+} from '$env/static/private';
 
 /**
  * Creates or gets already existing SpotifyApi instance
@@ -7,7 +11,7 @@ import { env } from '$env/dynamic/private';
  */
 export const getSpotifyClient = async () =>
 	await SpotifyApi.getInstance({
-		clientId: env.SPOTIFY_CLIENT_ID,
-		clientSecret: env.SPOTIFY_CLIENT_SECRET,
-		redirectUri: env.SPOTIFY_REDIRECT_URI
+		clientId: SPOTIFY_CLIENT_ID,
+		clientSecret: SPOTIFY_CLIENT_SECRET,
+		redirectUri: SPOTIFY_REDIRECT_URI
 	});
