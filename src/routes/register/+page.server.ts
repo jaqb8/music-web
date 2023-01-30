@@ -49,13 +49,11 @@ export const actions: Actions = {
 
 		try {
 			const { email, password } = registerSchema.parse(formData);
-			const { error: err } = await locals.sb.auth.signUp({ email, password });
+			const { error: supabaseError } = await locals.sb.auth.signUp({ email, password });
 
-			if (err) {
-				throw err;
+			if (supabaseError) {
+				throw supabaseError;
 			}
-
-			throw redirect(303, '/');
 		} catch (err) {
 			if (err instanceof ZodError) {
 				const { fieldErrors: errors } = err.flatten();
@@ -68,11 +66,13 @@ export const actions: Actions = {
 					data: formData,
 					error: err.message
 				});
-			} else if (err instanceof AuthApiError && err.status === 500) {
+			} else {
+				console.error(err);
 				return fail(500, {
 					error: 'Server error. Please try again later.'
 				});
 			}
 		}
+		throw redirect(303, '/');
 	}
 };

@@ -1,14 +1,30 @@
 <script lang="ts">
-	import { Form, FormInput, SubmitButton } from '$lib/components';
+	import { Form, FormInput, SubmitButton, Alert } from '$lib/components';
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import { loading } from '$lib/stores';
+	import type { ActionData } from './$types';
 
 	export let submitFunction: SubmitFunction | undefined = undefined;
+	export let form: ActionData;
+
+	$: emailError = form?.errors?.email?.at(0);
+	$: emailValue = form?.data?.email?.toString() ?? '';
+	$: passwordError = form?.errors?.password?.at(0);
+	$: passwordValue = form?.data?.password?.toString() ?? '';
 </script>
 
-<Form actionName="login" {submitFunction}>
-	<FormInput name="email" type="email" />
-	<FormInput name="password" type="password" />
+<Form let:submitEvent actionName="login" {submitFunction}>
+	{#if form?.error}
+		<Alert text={form.error} />
+	{/if}
+	<FormInput name="email" type="email" value={emailValue} errorMessage={emailError} {submitEvent} />
+	<FormInput
+		name="password"
+		type="password"
+		value={passwordValue}
+		errorMessage={passwordError}
+		{submitEvent}
+	/>
 	<label for="forgot-password" class="label">
 		<a href="#!" id="forgot-password" class="label-text-alt link link-hover">Forgot password?</a>
 	</label>
