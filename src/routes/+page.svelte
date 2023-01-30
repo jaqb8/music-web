@@ -4,6 +4,7 @@
 	import type { PageData } from './$types';
 
 	export let data: PageData;
+	$: ({ albums, session } = data);
 
 	const submitLogout: SubmitFunction = async ({ cancel }) => {
 		const { error } = await supabaseClient.auth.signOut();
@@ -26,7 +27,7 @@
 		<h1 class="text-5xl font-bold">Music Web</h1>
 	</div>
 	<div class="grid grid-cols-3 gap-4 my-10 text-center">
-		{#each data.albums.items as album}
+		{#each albums.items as album}
 			<div class="card w-96 glass">
 				<figure><img src={album.images.at(0)?.url} alt="car!" /></figure>
 				<div class="card-body">
@@ -39,8 +40,8 @@
 			</div>
 		{/each}
 	</div>
-	{#if data.session}
-		<p>Welcome, {data.session.user.email}!</p>
+	{#if session}
+		<p>Welcome, {session.user.email}!</p>
 		<form action="/logout" method="POST" use:enhance={submitLogout}>
 			<button type="submit" class="btn btn-primary">Logout</button>
 		</form>
