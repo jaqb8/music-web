@@ -5,13 +5,11 @@ import dayjs from 'dayjs';
 import { err, ok } from 'neverthrow';
 import { error } from '@sveltejs/kit';
 
-vi.mock('$env/dynamic/private', () => {
+vi.mock('$env/static/private', () => {
 	return {
-		env: {
-			SPOTIFY_CLIENT_ID: '',
-			SPOTIFY_CLIENT_SECRET: '',
-			SPOTIFY_REDIRECT_URI: ''
-		}
+		SPOTIFY_CLIENT_ID: '',
+		SPOTIFY_CLIENT_SECRET: '',
+		SPOTIFY_REDIRECT_URI: ''
 	};
 });
 
