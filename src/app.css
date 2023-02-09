@@ -1,3 +1,90 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import './tailwind.css';
+
+:root {
+	--font-sans: 'Montserrat', sans-serif;
+
+	/* colors */
+	--primary-color-hue: 15;
+	--primary-color-saturation: 100%;
+	--primary-color-lightness: 50%;
+
+	--secondary-color-hue: 158;
+	--secondary-color-saturation: 64%;
+	--secondary-color-lightness: 52%;
+
+	--background-color-hue: 0;
+	--background-color-saturation: 0%;
+	--background-color-lightness: 100%;
+
+	--text-color-hue: 24;
+	--text-color-saturation: 5%;
+	--text-color-lightness: 25%;
+
+	--white-color-hue: 0;
+	--white-color-saturation: 0%;
+	--white-color-lightness: 100%;
+
+	--swiper-navigation-size: 30px;
+	--swiper-navigation-top-offset: 50%;
+	--swiper-navigation-sides-offset: 3.5rem;
+	--swiper-navigation-color: rgb(122, 122, 122);
+
+	--swiper-pagination-color: #529b03;
+	--swiper-pagination-left: auto;
+	--swiper-pagination-right: 8px;
+	--swiper-pagination-bottom: 8px;
+	--swiper-pagination-top: auto;
+	--swiper-pagination-fraction-color: inherit;
+	--swiper-pagination-progressbar-bg-color: rgba(0, 0, 0, 0.25);
+	--swiper-pagination-progressbar-size: 4px;
+	--swiper-pagination-bullet-size: 8px;
+	--swiper-pagination-bullet-width: 8px;
+	--swiper-pagination-bullet-height: 8px;
+	--swiper-pagination-bullet-inactive-color: #000;
+	--swiper-pagination-bullet-inactive-opacity: 0.2;
+	--swiper-pagination-bullet-opacity: 1;
+	--swiper-pagination-bullet-horizontal-gap: 4px;
+	--swiper-pagination-bullet-vertical-gap: 6px;
+}
+
+html {
+	height: 100%;
+	-webkit-font-smoothing: antialiased;
+	scroll-padding-top: var(--header-height);
+}
+
+html,
+body {
+	display: flex;
+	flex-direction: column;
+}
+
+@layer base {
+	body {
+		isolation: isolate;
+		justify-content: space-between;
+	}
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+	display: block;
+	max-width: 100%;
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	overflow-wrap: break-word;
+}
+
+.swiper-button-next {
+	display: none;
+}

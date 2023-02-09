@@ -5,3 +5,6 @@ export { default as Hero } from './Hero.svelte';
 export { default as FormCheckbox } from './FormCheckbox.svelte';
 export { default as SubmitButton } from './SubmitButton.svelte';
 export { default as Alert } from './Alert.svelte';
+export { default as Navbar } from './Navbar.svelte';
+export { default as Footer } from './Footer.svelte';
+export { default as Slider } from './Slider.svelte';

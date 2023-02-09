@@ -23,8 +23,7 @@ export const load: PageServerLoad = async ({ locals, setHeaders }) => {
 			headers
 		} = await locals.spotifyClient.getNewReleases({
 			country: 'PL',
-			limit: 10,
-			offset: 1
+			limit: 10
 		});
 
 		const cacheControl = headers['cache-control'];
