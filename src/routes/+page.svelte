@@ -2,6 +2,7 @@
 	import { enhance, type SubmitFunction } from '$app/forms';
 	import { supabaseClient } from '$lib/supabase';
 	import type { PageData } from './$types';
+	import { Slider } from '$lib/components';
 
 	export let data: PageData;
 	$: ({ albums, session } = data);
@@ -17,36 +18,23 @@
 	};
 </script>
 
-<svelte:head>
-	<title>Music Web</title>
-	<meta name="description" content="SvelteKit using supabase-js v2" />
-</svelte:head>
+<header>
+	<div class="flex justify-center">
+		<h1 class="text-2xl font-bold mt-8 mb-4">New Releases</h1>
+	</div>
+</header>
 
-<main>
-	<div class="my-10 text-center">
-		<h1 class="text-5xl font-bold">Music Web</h1>
-	</div>
-	<div class="grid grid-cols-3 gap-4 my-10 text-center">
-		{#each albums.items as album}
-			<div class="card w-96 glass">
-				<figure><img src={album.images.at(0)?.url} alt="car!" /></figure>
-				<div class="card-body">
-					<h2 class="card-title">{album.name}</h2>
-					<p>{album.artists.map((artist) => artist.name).join(', ')}</p>
-					<div class="card-actions justify-end">
-						<button class="btn btn-primary">Learn now!</button>
-					</div>
-				</div>
-			</div>
-		{/each}
-	</div>
+<!-- Section Slider -->
+<section id="slider">
+	<Slider albums={albums.items} />
+</section>
+
+<!-- Section Temp logged in -->
+<section id="temp">
 	{#if session}
 		<p>Welcome, {session.user.email}!</p>
 		<form action="/logout" method="POST" use:enhance={submitLogout}>
 			<button type="submit" class="btn btn-primary">Logout</button>
 		</form>
-	{:else}
-		<a href="/login" class="btn btn-primary">Login</a>
-		<a href="/register" class="btn btn-primary">Register</a>
 	{/if}
-</main>
+</section>
