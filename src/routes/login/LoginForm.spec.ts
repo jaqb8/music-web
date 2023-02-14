@@ -16,7 +16,8 @@ describe('<LoginForm />', () => {
 	`('should call submit function $expected times on submit', async ({ email, expected }) => {
 		const submitFunction = vi.fn().mockResolvedValue(() => 'submitted');
 		const { getByLabelText, getByText } = render(LoginForm as any, {
-			submitFunction
+			submitFunction,
+			form: {}
 		});
 
 		const emailField = getByLabelText('Email');
@@ -40,7 +41,9 @@ describe('<LoginForm />', () => {
 	});
 
 	it('should disable submit button when component is loading', async () => {
-		const { getByText } = render(LoginForm as any);
+		const { getByText } = render(LoginForm as any, {
+			form: {}
+		});
 		const submitButton = getByText('login');
 
 		loadingMocked.set(true);
@@ -50,7 +53,9 @@ describe('<LoginForm />', () => {
 	});
 
 	it('should enable submit button when component is not loading', async () => {
-		const { getByText } = render(LoginForm as any);
+		const { getByText } = render(LoginForm as any, {
+			form: {}
+		});
 		const submitButton = getByText('login');
 
 		loadingMocked.set(false);

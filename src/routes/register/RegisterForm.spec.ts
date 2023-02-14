@@ -1,15 +1,13 @@
 import '@testing-library/jest-dom';
 import { vi } from 'vitest';
-import { render, fireEvent, getByRole, screen } from '@testing-library/svelte';
+import { render, fireEvent, screen } from '@testing-library/svelte';
 import RegisterForm from './RegisterForm.svelte';
 import { loading } from '$lib/stores';
-import { page } from '$app/stores';
 import { tick } from 'svelte';
 
 vi.mock('$lib/stores', async () => await vi.importActual('$lib/stores'));
 vi.mock('$app/stores', async () => await vi.importActual('$app/stores'));
 const loadingMocked = vi.mocked(loading);
-const pageMocked = vi.mocked(page);
 
 describe('<RegisterForm />', () => {
 	it.each`
@@ -68,7 +66,7 @@ describe('<RegisterForm />', () => {
 	});
 
 	it('should dispay form errors', async () => {
-		const { getByText } = render(RegisterForm as any, {
+		render(RegisterForm as any, {
 			form: {
 				errors: {
 					email: ['Email is required'],
@@ -86,7 +84,7 @@ describe('<RegisterForm />', () => {
 	});
 
 	it('should display form alert', () => {
-		const { getByText } = render(RegisterForm as any, {
+		render(RegisterForm as any, {
 			form: {
 				error: 'User already exists'
 			}
