@@ -63,6 +63,7 @@ body {
 	body {
 		isolation: isolate;
 		justify-content: space-between;
+		box-sizing: border-box;
 	}
 }
 
