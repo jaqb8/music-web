@@ -44,10 +44,9 @@
 						checked={currentRating === rating}
 						on:mouseenter={() => (currentRating = rating)}
 						name="rating-10"
-						class="{rating === 0 &&
-							'rating-hidden'} bg-primary-content mask mask-star-2 mask-half-{Number.isInteger(
-							rating
-						)
+						class="{rating === 0
+							? 'rating-hidden'
+							: ''} bg-primary-content mask mask-star-2 mask-half-{Number.isInteger(rating)
 							? '2 mr-2'
 							: '1'}"
 					/>
