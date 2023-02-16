@@ -2,9 +2,12 @@
 	import type { PageData } from './$types';
 
 	export let data: PageData;
-	$: ({ album } = data);
 
-	$: console.log(album);
+	const ratings = [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5];
+	let currentRating = 0;
+	let isRatingSelected = false;
+
+	$: ({ album } = data);
 </script>
 
 <div
@@ -25,6 +28,31 @@
 			<span class="badge badge-info badge-lg mb-2">{album.album_type.toUpperCase()}</span>
 			<h1 class="font-bold text-3xl">{album.name}</h1>
 			<p>{album.artists.map((artist) => artist.name).join(', ')}</p>
+			<div
+				class="rating rating-lg rating-half my-3"
+				on:mouseleave={() => {
+					if (!isRatingSelected) {
+						currentRating = 0;
+					}
+				}}
+			>
+				{#each ratings as rating}
+					<input
+						type="radio"
+						disabled={isRatingSelected}
+						on:click={() => (isRatingSelected = true)}
+						checked={currentRating === rating}
+						on:mouseenter={() => (currentRating = rating)}
+						name="rating-10"
+						class="{rating === 0 &&
+							'rating-hidden'} bg-primary-content mask mask-star-2 mask-half-{Number.isInteger(
+							rating
+						)
+							? '2 mr-2'
+							: '1'}"
+					/>
+				{/each}
+			</div>
 		</div>
 	</div>
 </header>
