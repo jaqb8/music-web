@@ -1,4 +1,4 @@
-<footer class="footer p-10 bg-primary-focus text-secondary-focus">
+<footer class="footer p-10 bg-secondary-focus text-secondary-content z-10">
 	<div>
 		<svg
 			width="50"

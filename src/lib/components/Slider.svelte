@@ -13,7 +13,7 @@
 					<h2 class="card-title">{album.name}</h2>
 					<p>{album.artists.map((artist) => artist.name).join(', ')}</p>
 					<div class="card-actions justify-end">
-						<button class="btn btn-primary">Listen</button>
+						<a href="/album/{album.id}" class="btn btn-primary">Listen</a>
 					</div>
 				</div>
 			</div></swiper-slide
