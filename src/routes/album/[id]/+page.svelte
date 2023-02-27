@@ -1,6 +1,8 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { fly } from 'svelte/transition';
+	import { fly, fade } from 'svelte/transition';
+	import MdDelete from 'svelte-icons/md/MdDelete.svelte';
+	import MdSend from 'svelte-icons/md/MdSend.svelte';
 
 	export let data: PageData;
 
@@ -31,6 +33,7 @@
 			<p>{album.artists.map((artist) => artist.name).join(', ')}</p>
 			{#if !isRatingSelected}
 				<div
+					in:fade={{ delay: 500 }}
 					class="rating rating-md lg:rating-lg my-5"
 					on:mouseleave={() => {
 						if (!isRatingSelected) {
@@ -51,8 +54,12 @@
 					{/each}
 				</div>
 			{:else}
-				<div class="grid grid-rows-4 bg-secondary rounded-sm m-2 p-4">
-					<div class="row-span-2 flex gap-4">
+				<div
+					in:fly={{ y: 150 }}
+					out:fly={{ y: 150 }}
+					class="grid grid-rows-2 bg-secondary rounded-sm my-6 p-4 gap-5"
+				>
+					<div class="flex justify-between gap-4">
 						<div class="avatar">
 							<div class="w-16 rounded-full">
 								<img
@@ -65,20 +72,28 @@
 							<div class="opacity-70">Your rating is</div>
 							<div class="font-extrabold text-4xl">{currentRating}</div>
 						</div>
+						<button
+							class="w-8 ml-auto mr-2 text-info hover:text-error cursor-pointer"
+							on:click={() => {
+								isRatingSelected = false;
+							}}
+						>
+							<MdDelete />
+						</button>
 					</div>
-					<div class="">bb</div>
-				</div>
-
-				<div in:fly={{ y: 150 }} class="stats shadow bg-secondary text-white">
-					<div class="stat">
-						<div class="flex">
-							<div class="stat-title">Your rating is</div>
-							<div class="stat-value">{currentRating}</div>
-						</div>
-						<div class="stat-actions">
-							<input type="text" placeholder="Share your opinion..." class="input input-sm" />
-							<button class="btn btn-sm mx-2 btn-success">Comment</button>
-							<button class="btn btn-sm btn-warning">Remove</button>
+					<div class="flex gap-2 justify-between items-center">
+						<div class="form-control">
+							<label class="input-group">
+								<input
+									type="text"
+									placeholder="Share your opinion..."
+									class="input text-secondary w-64"
+								/>
+								<span
+									class="w-12 text-success-content bg-info hover:cursor-pointer hover:bg-success"
+									><MdSend /></span
+								>
+							</label>
 						</div>
 					</div>
 				</div>
