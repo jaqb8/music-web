@@ -49,7 +49,13 @@ export const actions: Actions = {
 
 		try {
 			const { email, password } = registerSchema.parse(formData);
-			const { error: supabaseError } = await locals.sb.auth.signUp({ email, password });
+			const { error: supabaseError } = await locals.sb.auth.signUp({
+				email,
+				password,
+				options: {
+					data: { user_name: email }
+				}
+			});
 
 			if (supabaseError) {
 				throw supabaseError;

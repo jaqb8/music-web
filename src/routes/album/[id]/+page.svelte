@@ -9,8 +9,17 @@
 	const ratings = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 	let currentRating = 0;
 	let isRatingSelected = false;
+	let isModalOpen = false;
 
-	$: ({ album } = data);
+	$: ({ album, session } = data);
+
+	const onClick = () => {
+		if (session) {
+			isRatingSelected = true;
+		} else {
+			isModalOpen = true;
+		}
+	};
 </script>
 
 <div
@@ -45,7 +54,7 @@
 						<input
 							type="radio"
 							disabled={isRatingSelected}
-							on:click={() => (isRatingSelected = true)}
+							on:click={() => onClick()}
 							checked={currentRating === rating}
 							on:mouseenter={() => (currentRating = rating)}
 							name="rating-10"
@@ -111,3 +120,15 @@
 		</ul>
 	</div>
 </section>
+
+<input type="checkbox" id="my-modal" class="modal-toggle" checked={isModalOpen} />
+<div class="modal">
+	<div class="modal-box relative">
+		<h3 class="font-bold text-lg">Sign in or sign to rate albums!</h3>
+		<p class="py-4">You have to be authenticated to rate the album.</p>
+		<div class="modal-action justify-center">
+			<a class="btn" href="/login">login page</a>
+			<a class="btn" href="/login">register page</a>
+		</div>
+	</div>
+</div>
