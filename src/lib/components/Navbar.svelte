@@ -1,8 +1,23 @@
 <script lang="ts">
 	import { enhance, type SubmitFunction } from '$app/forms';
 	import { page } from '$app/stores';
+	import toast from 'svelte-french-toast';
+	import { supabaseClient } from '$lib/supabase';
 
-	export let logoutFunction: SubmitFunction;
+	const submitLogout: SubmitFunction = async ({ cancel }) => {
+		const { error } = await supabaseClient.auth.signOut();
+
+		if (error) {
+			console.error(error);
+		} else {
+			toast('You have been logged out');
+			cancel();
+		}
+
+		return async ({ update }) => {
+			await update();
+		};
+	};
 </script>
 
 <nav class="navbar bg-base-300 text-primary">
@@ -23,7 +38,7 @@
 						/>
 					</div>
 				</label>
-				<form action="/logout" method="post" use:enhance={logoutFunction}>
+				<form action="/logout" method="post" use:enhance={submitLogout}>
 					<ul
 						id="navmenu"
 						tabindex="-1"

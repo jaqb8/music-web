@@ -14,9 +14,18 @@ declare global {
 			session: Session | null;
 			spotifyClient: SpotifyClient;
 		}
+		interface Supabase {
+			Database: import('$lib/types/database.types').Database;
+			SchemaName: 'public';
+		}
 		interface PageData {
 			session: import('@supabase/supabase-js').Session | null;
 		}
 		// interface Platform {}
+	}
+	declare namespace svelteHTML {
+		interface HTMLAttributes<T> {
+			'on:outclick'?: (event: CustomEvent<T>) => void;
+		}
 	}
 }

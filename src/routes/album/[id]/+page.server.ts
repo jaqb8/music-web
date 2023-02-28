@@ -1,5 +1,7 @@
 import { redis } from '$lib/server/redis';
-import type { PageServerLoad } from './$types';
+import type { RatingValue } from '$lib/types';
+import { fail } from '@sveltejs/kit';
+import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals, params, setHeaders }) => {
 	const CACHE_KEY = params.id;
@@ -29,7 +31,57 @@ export const load: PageServerLoad = async ({ locals, params, setHeaders }) => {
 		return album;
 	};
 
-	return {
-		album: getAlbum()
+	const getUserRating = async () => {
+		if (!locals.session) {
+			return;
+		}
+
+		try {
+			const { data, error: supabaseError } = await locals.sb
+				.from('ratings')
+				.select()
+				.eq('user_id', locals.session.user.id)
+				.eq('album_id', params.id);
+
+			if (supabaseError) {
+				throw supabaseError;
+			}
+
+			return data;
+		} catch (error) {
+			console.error(error);
+		}
 	};
+
+	return {
+		album: getAlbum(),
+		userRating: getUserRating()
+	};
+};
+
+export const actions: Actions = {
+	addRating: async ({ request, locals, params }) => {
+		console.log('addRating');
+		if (!locals.session?.user) {
+			return fail(401, {
+				error: 'Unauthorized'
+			});
+		}
+
+		const rating = (await request.formData()).get('rating') as RatingValue;
+
+		try {
+			const { error: supabaseError } = await locals.sb.from('ratings').insert({
+				album_id: params.id,
+				user_id: locals.session.user.id,
+				rating: rating
+			});
+
+			if (supabaseError) {
+				throw supabaseError;
+			}
+		} catch (error) {
+			console.error(error);
+		}
+	}
 };

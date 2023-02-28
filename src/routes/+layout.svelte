@@ -4,10 +4,9 @@
 	import { supabaseClient } from '$lib/supabase';
 	import { invalidate } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import toast, { Toaster } from 'svelte-french-toast';
+	import { Toaster } from 'svelte-french-toast';
 	import Navbar from '$lib/components/Navbar.svelte';
 	import Footer from '$lib/components/Footer.svelte';
-	import type { SubmitFunction } from '$app/forms';
 
 	onMount(() => {
 		register();
@@ -21,22 +20,6 @@
 			subscription.unsubscribe();
 		};
 	});
-
-	// TODO - move to Navbar component
-	const submitLogout: SubmitFunction = async ({ cancel }) => {
-		const { error } = await supabaseClient.auth.signOut();
-
-		if (error) {
-			console.error(error);
-		} else {
-			toast('You have been logged out');
-			cancel();
-		}
-
-		return async ({ update }) => {
-			await update();
-		};
-	};
 </script>
 
 <svelte:head>
@@ -45,7 +28,7 @@
 </svelte:head>
 
 <Toaster />
-<Navbar logoutFunction={submitLogout} />
+<Navbar />
 <main>
 	<slot />
 </main>
