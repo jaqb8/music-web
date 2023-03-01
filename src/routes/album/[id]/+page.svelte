@@ -8,33 +8,70 @@
 	import { enhance, type SubmitFunction } from '$app/forms';
 	import Spinner from '$lib/components/Spinner.svelte';
 	import { supabaseClient } from '$lib/supabase';
+	import { useMachine } from '@xstate/svelte';
+	import { createMachine } from 'xstate';
+
+	const states = {
+		noRate: 'no_rate',
+		isLoading: 'loading',
+		hasRate: 'has_rate',
+		hasError: 'error'
+	};
+
+	const ratingMachine = createMachine({
+		id: 'rating-machine',
+		predictableActionArguments: true,
+		initial: states.noRate,
+		states: {
+			[states.noRate]: {
+				on: {
+					ADD_RATING: states.isLoading,
+					FETCH_RATING: states.hasRate,
+					FETCH_RATING_ERROR: states.hasError
+				}
+			},
+			[states.isLoading]: {
+				on: {
+					ADD_RATING_SUCCESS: states.hasRate,
+					ADD_RATING_ERROR: states.hasError,
+					DELETE_RATING_SUCCESS: states.noRate,
+					DELETE_RATING_ERROR: states.hasError
+				}
+			},
+			[states.hasRate]: {
+				on: {
+					DELETE_RATING: states.isLoading
+				}
+			},
+			[states.hasError]: {
+				on: {
+					CLEAR_ERROR: states.noRate
+				}
+			}
+		}
+	});
 
 	export let data: PageData;
 	export let form: ActionData;
 	$: ({ album, session, userRating } = data);
-
-	let formRef: HTMLFormElement;
-	const ratings: RatingValue[] = [null, '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
-	let currentRating: RatingValue = null;
-	let isRatingSelected = false;
-	let isModalOpen = false;
-	let loading = false;
-
-	onMount(() => {
-		if (form?.error) {
-			isModalOpen = true;
-		}
-
+	const { state, send } = useMachine(ratingMachine);
+	$: {
 		if (userRating && userRating.length > 0) {
-			currentRating = userRating.at(0)?.rating;
-			isRatingSelected = true;
+			send('FETCH_RATING');
 		}
-	});
+
+		if (form?.error) {
+			send('FETCH_RATING_ERROR');
+		}
+	}
+	$: console.log($state.value);
+
+	const ratings: RatingValue[] = ['10', '9', '8', '7', '6', '5', '4', '3', '2', '1'];
 
 	const onSubmit: SubmitFunction = async ({ cancel, data }) => {
-		console.log('onSubmit');
+		send('ADD_RATING');
 		if (!session) {
-			isModalOpen = true;
+			send('ADD_RATING_ERROR');
 			cancel();
 			return;
 		}
@@ -51,9 +88,14 @@
 				throw supabaseError;
 			}
 
-			cancel();
+			return async ({ update }) => {
+				await update();
+				cancel();
+				send('ADD_RATING_SUCCESS');
+			};
 		} catch (error) {
 			console.error(error);
+			send('ADD_RATING_ERROR');
 		}
 	};
 </script>
@@ -76,22 +118,25 @@
 			<span class="badge badge-info badge-lg mb-2">{album.album_type.toUpperCase()}</span>
 			<h1 class="font-bold text-3xl">{album.name}</h1>
 			<p>{album.artists.map((artist) => artist.name).join(', ')}</p>
-			{#if !isRatingSelected && !loading}
-				<form method="post" action="?/addRating" use:enhance={onSubmit} bind:this={formRef}>
-					<div class="rating rating-md lg:rating-lg mt-10">
+
+			{#if [states.noRate, states.hasError].some($state.matches)}
+				<form method="post" action="?/addRating" use:enhance={onSubmit}>
+					<div class="rate {!session && 'rate-disabled'}">
 						{#each ratings as rating}
-							<input
-								type="radio"
-								bind:group={currentRating}
-								value={rating}
-								name="rating"
-								class="{rating === null ? 'rating-hidden' : ''} bg-error mask mask-star-2 mx-1"
-							/>
+							<input type="submit" id="star{rating}" value={rating} name="rating" />
+							<label for="star{rating}">{rating} stars</label>
 						{/each}
 					</div>
-					<button>Rate</button>
 				</form>
-			{:else if isRatingSelected && !loading}
+			{/if}
+
+			{#if $state.matches(states.isLoading)}
+				<div class="mt-10 flex justify-end">
+					<Spinner />
+				</div>
+			{/if}
+
+			{#if $state.matches(states.hasRate)}
 				<div class="grid grid-rows-2 bg-secondary rounded-sm my-6 p-4 gap-5">
 					<div class="flex justify-between gap-4">
 						<div class="avatar">
@@ -104,15 +149,9 @@
 						</div>
 						<div class="flex-col">
 							<div class="opacity-70">Your rating is</div>
-							<div class="font-extrabold text-4xl">{currentRating}</div>
+							<div class="font-extrabold text-4xl">{userRating?.at(0)?.rating}</div>
 						</div>
-						<button
-							class="w-8 ml-auto mr-2 text-info hover:text-error cursor-pointer"
-							on:click={() => {
-								isRatingSelected = false;
-								currentRating = null;
-							}}
-						>
+						<button class="w-8 ml-auto mr-2 text-info hover:text-error cursor-pointer">
 							<MdDelete />
 						</button>
 					</div>
@@ -132,10 +171,6 @@
 						</div>
 					</div>
 				</div>
-			{:else}
-				<div class="mt-10 flex justify-end">
-					<Spinner />
-				</div>
 			{/if}
 		</div>
 	</div>
@@ -151,14 +186,21 @@
 	</div>
 </section>
 
-<input type="checkbox" id="my-modal" class="modal-toggle" checked={isModalOpen} />
-<div class="modal">
-	<div class="modal-box" use:clickOutside on:outclick={() => (isModalOpen = false)}>
-		<h3 class="font-bold text-lg">Login or create new account first!</h3>
+{#if $state.matches(states.hasError)}
+	<input type="checkbox" id="my-modal-4" class="modal-toggle" checked />
+{/if}
+<label
+	for="my-modal-4"
+	class="modal cursor-pointer"
+	use:clickOutside
+	on:outclick={() => send('CLEAR_ERROR')}
+>
+	<label class="modal-box relative" for="">
+		<h3 class="text-lg font-bold">Login or create an account first!</h3>
 		<p class="py-4">You have to be signed in to rate albums.</p>
-		<div class="modal-action justify-center sm:justify-end">
-			<a href="/login" class="btn">login</a>
-			<a href="/register" class="btn">register</a>
+		<div class="modal-action justify-center md:justify-end">
+			<button class="btn">Login</button>
+			<button class="btn">Register</button>
 		</div>
-	</div>
-</div>
+	</label>
+</label>
