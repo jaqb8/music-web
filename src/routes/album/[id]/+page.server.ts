@@ -1,9 +1,10 @@
 import { redis } from '$lib/server/redis';
 import type { RatingValue } from '$lib/types';
-import { fail } from '@sveltejs/kit';
+import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ locals, params, setHeaders }) => {
+export const load: PageServerLoad = async ({ locals, params, setHeaders, depends }) => {
+	depends('app:album');
 	const CACHE_KEY = params.id;
 
 	const getAlbum = async (): Promise<SpotifyApi.SingleAlbumResponse> => {
@@ -33,7 +34,7 @@ export const load: PageServerLoad = async ({ locals, params, setHeaders }) => {
 
 	const getUserRating = async () => {
 		if (!locals.session) {
-			return;
+			return [];
 		}
 
 		try {
@@ -48,8 +49,11 @@ export const load: PageServerLoad = async ({ locals, params, setHeaders }) => {
 			}
 
 			return data;
-		} catch (error) {
-			console.error(error);
+		} catch (err) {
+			console.error('getUserRating error:', err);
+			throw error(500, {
+				message: 'Interal Server Error'
+			});
 		}
 	};
 
@@ -80,8 +84,11 @@ export const actions: Actions = {
 			if (supabaseError) {
 				throw supabaseError;
 			}
-		} catch (error) {
-			console.error(error);
+		} catch (err) {
+			console.error('addRating error', err);
+			throw error(500, {
+				message: 'Interal Server Error'
+			});
 		}
 	}
 };

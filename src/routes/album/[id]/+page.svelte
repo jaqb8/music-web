@@ -1,77 +1,39 @@
 <script lang="ts">
-	import type { ActionData, PageData } from './$types';
+	import type { PageData } from './$types';
 	import MdDelete from 'svelte-icons/md/MdDelete.svelte';
 	import MdSend from 'svelte-icons/md/MdSend.svelte';
 	import { clickOutside } from '$lib/shared';
 	import type { RatingValue } from '$lib/types';
-	import { onMount } from 'svelte';
 	import { enhance, type SubmitFunction } from '$app/forms';
 	import Spinner from '$lib/components/Spinner.svelte';
 	import { supabaseClient } from '$lib/supabase';
 	import { useMachine } from '@xstate/svelte';
-	import { createMachine } from 'xstate';
+	import { ratingMachine, states } from './ratingMachine';
 
-	const states = {
-		noRate: 'no_rate',
-		isLoading: 'loading',
-		hasRate: 'has_rate',
-		hasError: 'error'
-	};
-
-	const ratingMachine = createMachine({
-		id: 'rating-machine',
-		predictableActionArguments: true,
-		initial: states.noRate,
-		states: {
-			[states.noRate]: {
-				on: {
-					ADD_RATING: states.isLoading,
-					FETCH_RATING: states.hasRate,
-					FETCH_RATING_ERROR: states.hasError
-				}
-			},
-			[states.isLoading]: {
-				on: {
-					ADD_RATING_SUCCESS: states.hasRate,
-					ADD_RATING_ERROR: states.hasError,
-					DELETE_RATING_SUCCESS: states.noRate,
-					DELETE_RATING_ERROR: states.hasError
-				}
-			},
-			[states.hasRate]: {
-				on: {
-					DELETE_RATING: states.isLoading
-				}
-			},
-			[states.hasError]: {
-				on: {
-					CLEAR_ERROR: states.noRate
-				}
-			}
+	export let data: PageData;
+	$: ({ album, session, userRating } = data);
+	const { state, send } = useMachine(ratingMachine, {
+		guards: {
+			notRated: () => !Boolean(session) || data.userRating.length === 0,
+			rated: () => Boolean(data.session) && data.userRating.length > 0,
+			isAuthenticated: () => Boolean(data.session),
+			isNotAuthenticated: () => !Boolean(data.session)
 		}
 	});
 
-	export let data: PageData;
-	export let form: ActionData;
-	$: ({ album, session, userRating } = data);
-	const { state, send } = useMachine(ratingMachine);
 	$: {
-		if (userRating && userRating.length > 0) {
-			send('FETCH_RATING');
-		}
-
-		if (form?.error) {
-			send('FETCH_RATING_ERROR');
-		}
+		console.log(data);
+		// if (!data.session) {
+		// 	send('LOGOUT');
+		// }
+		console.log($state.value);
 	}
-	$: console.log($state.value);
 
 	const ratings: RatingValue[] = ['10', '9', '8', '7', '6', '5', '4', '3', '2', '1'];
 
 	const onSubmit: SubmitFunction = async ({ cancel, data }) => {
 		send('ADD_RATING');
 		if (!session) {
-			send('ADD_RATING_ERROR');
 			cancel();
 			return;
 		}
@@ -94,7 +56,7 @@
 				send('ADD_RATING_SUCCESS');
 			};
 		} catch (error) {
-			console.error(error);
+			console.error('albumView onSubmit', error);
 			send('ADD_RATING_ERROR');
 		}
 	};
@@ -119,7 +81,7 @@
 			<h1 class="font-bold text-3xl">{album.name}</h1>
 			<p>{album.artists.map((artist) => artist.name).join(', ')}</p>
 
-			{#if [states.noRate, states.hasError].some($state.matches)}
+			{#if [states.noRate, states.hasModalOpen].some($state.matches)}
 				<form method="post" action="?/addRating" use:enhance={onSubmit}>
 					<div class="rate {!session && 'rate-disabled'}">
 						{#each ratings as rating}
@@ -186,14 +148,14 @@
 	</div>
 </section>
 
-{#if $state.matches(states.hasError)}
+{#if $state.matches(states.hasModalOpen)}
 	<input type="checkbox" id="my-modal-4" class="modal-toggle" checked />
 {/if}
 <label
 	for="my-modal-4"
 	class="modal cursor-pointer"
 	use:clickOutside
-	on:outclick={() => send('CLEAR_ERROR')}
+	on:outclick={() => send('HIDE_MODAL')}
 >
 	<label class="modal-box relative" for="">
 		<h3 class="text-lg font-bold">Login or create an account first!</h3>

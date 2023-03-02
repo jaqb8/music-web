@@ -26,3 +26,5 @@ export type RatingValue =
 	| '10'
 	| null
 	| undefined;
+
+export type { default as Database } from './database.types';

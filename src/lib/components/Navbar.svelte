@@ -3,14 +3,16 @@
 	import { page } from '$app/stores';
 	import toast from 'svelte-french-toast';
 	import { supabaseClient } from '$lib/supabase';
+	import { invalidate } from '$app/navigation';
 
 	const submitLogout: SubmitFunction = async ({ cancel }) => {
 		const { error } = await supabaseClient.auth.signOut();
 
 		if (error) {
-			console.error(error);
+			console.error('Navbar submitLogout', error);
 		} else {
 			toast('You have been logged out');
+			invalidate('app:album');
 			cancel();
 		}
 

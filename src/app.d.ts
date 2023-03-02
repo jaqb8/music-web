@@ -15,7 +15,7 @@ declare global {
 			spotifyClient: SpotifyClient;
 		}
 		interface Supabase {
-			Database: import('$lib/types/database.types').Database;
+			Database: import('$lib/types').Database;
 			SchemaName: 'public';
 		}
 		interface PageData {
