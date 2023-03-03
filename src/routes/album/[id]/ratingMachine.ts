@@ -1,57 +1,91 @@
 import { createMachine } from 'xstate';
+import type { Session } from '@supabase/supabase-js';
+import type { Database } from '$lib/types';
 
 export const states = {
-	initial: 'inital',
-	noRate: 'no_rate',
-	isLoading: 'loading',
-	hasRate: 'has_rate',
-	hasModalOpen: 'has_modal_open'
+	initial: 'initial',
+	authenticated: {
+		initial: 'authenticated',
+		noRate: 'no_rate',
+		rated: 'rated',
+		loading: 'loading'
+	},
+	notAuthenticated: {
+		initial: 'notAuthenticated',
+		hasModalOpen: 'has_modal_open'
+	}
 };
+
+interface RatingContext {
+	session: Session | null;
+	userRating: Database['public']['Tables']['ratings']['Row'][];
+}
 
 export const ratingMachine = createMachine({
 	id: 'rating-machine',
 	predictableActionArguments: true,
+	schema: {
+		context: {} as RatingContext
+	},
 	initial: states.initial,
 	states: {
-		[states.initial]: {
+		initial: {
 			always: [
-				{ target: states.noRate, cond: 'notRated' },
-				{ target: states.hasRate, cond: 'rated' }
+				{ target: states.authenticated.initial, cond: 'isAuthenticated' },
+				{ target: states.notAuthenticated.initial }
 			]
 		},
-		[states.noRate]: {
-			on: {
-				ADD_RATING: [
-					{
-						target: states.isLoading,
-						cond: 'isAuthenticated'
-					},
-					{
-						target: states.hasModalOpen
+		notAuthenticated: {
+			initial: states.notAuthenticated.initial,
+			states: {
+				[states.notAuthenticated.initial]: {
+					on: {
+						ADD_RATING: {
+							target: states.notAuthenticated.hasModalOpen,
+							cond: 'isAuthenticated',
+							actions: ['addRating']
+						}
 					}
-				]
-			}
-		},
-		[states.isLoading]: {
-			on: {
-				ADD_RATING_SUCCESS: states.hasRate,
-				DELETE_RATING_SUCCESS: states.noRate
-			}
-		},
-		[states.hasRate]: {
-			on: {
-				DELETE_RATING: states.isLoading
-			},
-			always: [
-				{
-					target: states.noRate,
-					cond: 'isNotAuthenticated'
+				},
+				[states.notAuthenticated.hasModalOpen]: {
+					on: {
+						HIDE_MODAL: states.notAuthenticated.initial
+					}
 				}
-			]
+			}
 		},
-		[states.hasModalOpen]: {
+		authenticated: {
+			initial: states.authenticated.initial,
 			on: {
-				HIDE_MODAL: states.noRate
+				LOGOUT: states.initial
+			},
+			states: {
+				[states.authenticated.initial]: {
+					always: [
+						{ target: states.authenticated.rated, cond: 'hasRating' },
+						{ target: states.authenticated.noRate }
+					]
+				},
+				[states.authenticated.rated]: {
+					on: {
+						DELETE_RATING: states.authenticated.loading
+					}
+				},
+				[states.authenticated.noRate]: {
+					on: {
+						ADD_RATING: {
+							target: states.authenticated.loading,
+							cond: 'isAuthenticated',
+							actions: ['addRating']
+						}
+					}
+				},
+				[states.authenticated.loading]: {
+					on: {
+						ADD_RATING_SUCCESS: states.authenticated.rated,
+						DELETE_RATING_SUCCESS: states.authenticated.noRate
+					}
+				}
 			}
 		}
 	}
