@@ -11,6 +11,8 @@
 	$: emailValue = form?.data?.email?.toString() ?? '';
 	$: passwordError = form?.errors?.password?.at(0);
 	$: passwordValue = form?.data?.password?.toString() ?? '';
+
+	$: console.log('passwordError', passwordError);
 </script>
 
 <Form let:submitEvent actionName="login" {submitFunction}>

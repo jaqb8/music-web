@@ -23,8 +23,10 @@
 		class="input {!errorMessage ? 'input-bordered' : 'input-error'}"
 	/>
 	{#key submitEvent}
-		<label in:fly={{ x: -10, delay: 150 }} for="name" class="label {!errorMessage && 'hidden'}">
-			<span class="label-text-alt text-error">{errorMessage}</span>
-		</label>
+		{#if errorMessage}
+			<label in:fly={{ x: -10, delay: 150 }} for="name" class="label">
+				<span class="label-text-alt text-error">{errorMessage ? errorMessage : ''}</span>
+			</label>
+		{/if}
 	{/key}
 </div>

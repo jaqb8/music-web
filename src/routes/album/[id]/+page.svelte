@@ -8,25 +8,19 @@
 	import Spinner from '$lib/components/Spinner.svelte';
 	import { supabaseClient } from '$lib/supabase';
 	import { useMachine } from '@xstate/svelte';
-	import { ratingMachine, states } from './ratingMachine';
+	import { ratingMachine, ratingStates } from '$lib/state';
 	import { page } from '$app/stores';
 	import { error } from '@sveltejs/kit';
 	import type { Session } from '@supabase/supabase-js';
 
-	export let data: PageData;
-	$: ({ album } = data);
 	const { state, send } = useMachine(
 		ratingMachine.withContext({
 			session: $page.data.session,
-			userRating: $page.data.userRating
+			userRating: $page.data.userRating.at(0)?.rating
 		}),
 		{
-			guards: {
-				isAuthenticated: ({ session }) => Boolean(session),
-				hasRating: ({ userRating }) => userRating && userRating.length > 0
-			},
 			actions: {
-				addRating: async ({ session }, { data, cancel }) => {
+				addRating: async ({ session }, { data }) => {
 					const userId = (session as Session).user.id;
 					const rating = data.get('rating') as RatingValue;
 					const { error: supabaseError } = await supabaseClient.from('ratings').insert({
@@ -42,21 +36,25 @@
 							message: 'Internal server error'
 						});
 					}
-
-					cancel();
-					send('ADD_RATING_SUCCESS');
+					send('ADD_RATING_SUCCESS', { userRating: rating });
 				}
 			}
 		}
 	);
 
-	$: console.log('session', $page.data.session);
-	$: console.log('state', $state.value);
+	export let data: PageData;
+	$: ({ album } = data);
+	$: {
+		if (!$page.data.session) {
+			send('LOGOUT');
+		}
+	}
 
 	const ratings: RatingValue[] = ['10', '9', '8', '7', '6', '5', '4', '3', '2', '1'];
 
 	const onSubmit: SubmitFunction = async ({ cancel, data }) => {
-		send('ADD_RATING', { data, cancel });
+		send('ADD_RATING', { data });
+		cancel();
 	};
 </script>
 
@@ -79,7 +77,7 @@
 			<h1 class="font-bold text-3xl">{album.name}</h1>
 			<p>{album.artists.map((artist) => artist.name).join(', ')}</p>
 
-			{#if [{ authenticated: states.authenticated.noRate }, { notAuthenticated: states.notAuthenticated.initial }, { notAuthenticated: states.notAuthenticated.hasModalOpen }].some($state.matches)}
+			{#if [ratingStates.noRate, ratingStates.hasModalOpen].some($state.matches)}
 				<form method="post" action="?/addRating" use:enhance={onSubmit}>
 					<div class="rate {!$state.context.session && 'rate-disabled'}">
 						{#each ratings as rating}
@@ -90,13 +88,13 @@
 				</form>
 			{/if}
 
-			{#if $state.matches({ authenticated: states.authenticated.loading })}
+			{#if $state.matches(ratingStates.loading)}
 				<div class="mt-10 flex justify-end">
 					<Spinner />
 				</div>
 			{/if}
 
-			{#if $state.matches({ authenticated: states.authenticated.rated })}
+			{#if $state.matches(ratingStates.rated)}
 				<div class="grid grid-rows-2 bg-secondary rounded-sm my-6 p-4 gap-5">
 					<div class="flex justify-between gap-4">
 						<div class="avatar">
@@ -109,7 +107,7 @@
 						</div>
 						<div class="flex-col">
 							<div class="opacity-70">Your rating is</div>
-							<div class="font-extrabold text-4xl">{$state.context.userRating.at(0)?.rating}</div>
+							<div class="font-extrabold text-4xl">{$state.context.userRating}</div>
 						</div>
 						<button class="w-8 ml-auto mr-2 text-info hover:text-error cursor-pointer">
 							<MdDelete />
@@ -146,7 +144,7 @@
 	</div>
 </section>
 
-{#if $state.matches({ notAuthenticated: states.notAuthenticated.hasModalOpen })}
+{#if $state.matches(ratingStates.hasModalOpen)}
 	<input type="checkbox" id="my-modal-4" class="modal-toggle" checked />
 {/if}
 <label
