@@ -3,6 +3,7 @@
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import { loading } from '$lib/stores';
 	import type { ActionData } from './$types';
+	import { page } from '$app/stores';
 
 	export let submitFunction: SubmitFunction | undefined = undefined;
 	export let form: ActionData;
@@ -11,11 +12,13 @@
 	$: emailValue = form?.data?.email?.toString() ?? '';
 	$: passwordError = form?.errors?.password?.at(0);
 	$: passwordValue = form?.data?.password?.toString() ?? '';
-
-	$: console.log('passwordError', passwordError);
 </script>
 
-<Form let:submitEvent actionName="login" {submitFunction}>
+<Form
+	let:submitEvent
+	actionName="login&redirectTo={$page.url.searchParams.get('redirectTo')}"
+	{submitFunction}
+>
 	{#if form?.error}
 		<Alert text={form.error} />
 	{/if}

@@ -63,8 +63,8 @@
 	{:else}
 		<div class="flex-none">
 			<ul class="menu menu-horizontal">
-				<li><a href="/login">Login</a></li>
-				<li><a href="/register">Register</a></li>
+				<li><a href="/login?redirectTo={$page.url.pathname}">Login</a></li>
+				<li><a href="/register?redirectTo={$page.url.pathname}">Register</a></li>
 			</ul>
 		</div>
 	{/if}

@@ -6,7 +6,9 @@ const submitForm: SubmitFunction = () => {
 	loading.set(true);
 
 	return async ({ result }) => {
-		console.log('result', result);
+		if (result.type === 'redirect') {
+			applyAction({ type: 'success', status: result.status });
+		}
 		await applyAction(result);
 		loading.set(false);
 	};

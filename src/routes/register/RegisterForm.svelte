@@ -3,6 +3,7 @@
 	import type { SubmitFunction } from '@sveltejs/kit';
 	import { loading } from '$lib/stores';
 	import type { ActionData } from './$types';
+	import { page } from '$app/stores';
 
 	export let submitFunction: SubmitFunction | undefined = undefined;
 	export let form: ActionData;
@@ -15,7 +16,11 @@
 	$: termsChecked = form?.data?.terms === 'on';
 </script>
 
-<Form let:submitEvent actionName="register" {submitFunction}>
+<Form
+	let:submitEvent
+	actionName="register&redirectTo={$page.url.searchParams.get('redirectTo')}"
+	{submitFunction}
+>
 	{#if form?.error}
 		<Alert text={form.error} />
 	{/if}
