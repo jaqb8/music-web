@@ -14,22 +14,12 @@
 	$: passwordValue = form?.data?.password?.toString() ?? '';
 </script>
 
-<Form
-	let:submitEvent
-	actionName="login&redirectTo={$page.url.searchParams.get('redirectTo')}"
-	{submitFunction}
->
+<Form actionName="login&redirectTo={$page.url.searchParams.get('redirectTo')}" {submitFunction}>
 	{#if form?.error}
 		<Alert text={form.error} />
 	{/if}
-	<FormInput name="email" type="email" value={emailValue} errorMessage={emailError} {submitEvent} />
-	<FormInput
-		name="password"
-		type="password"
-		value={passwordValue}
-		errorMessage={passwordError}
-		{submitEvent}
-	/>
+	<FormInput name="email" type="email" value={emailValue} errorMessage={emailError} />
+	<FormInput name="password" type="password" value={passwordValue} errorMessage={passwordError} />
 	<label for="forgot-password" class="label">
 		<a href="#!" id="forgot-password" class="label-text-alt link link-hover">Forgot password?</a>
 	</label>

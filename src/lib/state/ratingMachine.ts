@@ -1,6 +1,7 @@
 import { assign, createMachine, type EventObject } from 'xstate';
 import type { Session } from '@supabase/supabase-js';
-import type { RatingValue } from '$lib/types';
+import type { RatingObject } from '$lib/types';
+import { ratingCommentMachine } from './ratingCommentMachine';
 
 export const states = {
 	initial: 'initial',
@@ -12,11 +13,11 @@ export const states = {
 
 interface RatingContext {
 	session: Session | null;
-	userRating: RatingValue;
+	userRating: RatingObject[];
 }
 
 interface RatingEvent extends EventObject {
-	userRating: RatingValue;
+	userRating: RatingObject[];
 }
 
 export const ratingMachine = createMachine(
@@ -47,16 +48,18 @@ export const ratingMachine = createMachine(
 				on: {
 					DELETE_RATING: {
 						target: states.loading,
-						cond: 'isAuthenticated'
+						cond: 'hasRate',
+						actions: ['deleteRating']
 					},
 					LOGOUT: {
 						target: states.initial,
 						actions: assign(() => ({
 							session: null,
-							userRating: undefined
+							userRating: []
 						}))
 					}
-				}
+				},
+				...ratingCommentMachine
 			},
 			[states.loading]: {
 				on: {
@@ -66,7 +69,12 @@ export const ratingMachine = createMachine(
 							userRating: (_, { userRating }) => userRating
 						})
 					},
-					DELETE_RATING_SUCCESS: states.noRate
+					DELETE_RATING_SUCCESS: {
+						target: states.noRate,
+						actions: assign<RatingContext, RatingEvent>({
+							userRating: []
+						})
+					}
 				}
 			},
 			[states.hasModalOpen]: {
@@ -80,7 +88,12 @@ export const ratingMachine = createMachine(
 		guards: {
 			isAuthenticated: ({ session }) => Boolean(session),
 			hasRate: ({ session, userRating }) =>
-				Boolean(session) && userRating !== null && userRating !== undefined
+				Boolean(session) && userRating.length > 0 && userRating.at(0)?.rating !== null,
+			hasComment: ({ session, userRating }) =>
+				Boolean(session) &&
+				userRating.length > 0 &&
+				userRating.at(0)?.rating !== null &&
+				userRating.at(0)?.comment !== null
 		}
 	}
 );

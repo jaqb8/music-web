@@ -1,5 +1,5 @@
 import { redis } from '$lib/server/redis';
-import type { RatingValue } from '$lib/types';
+import type { RatingObject } from '$lib/types';
 import { error, fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -32,7 +32,7 @@ export const load: PageServerLoad = async ({ locals, params, setHeaders, depends
 		return album;
 	};
 
-	const getUserRating = async () => {
+	const getUserRating = async (): Promise<RatingObject[]> => {
 		if (!locals.session) {
 			return [];
 		}
@@ -65,20 +65,20 @@ export const load: PageServerLoad = async ({ locals, params, setHeaders, depends
 
 export const actions: Actions = {
 	addRating: async ({ request, locals, params }) => {
-		console.log('addRating');
-		if (!locals.session?.user) {
+		if (!locals.session) {
 			return fail(401, {
 				error: 'Unauthorized'
 			});
 		}
 
-		const rating = (await request.formData()).get('rating') as RatingValue;
+		const rating = Object.fromEntries(await request.formData()).rating as RatingObject['rating'];
 
 		try {
 			const { error: supabaseError } = await locals.sb.from('ratings').insert({
-				album_id: params.id,
 				user_id: locals.session.user.id,
-				rating: rating
+				album_id: params.id,
+				rating,
+				comment: null
 			});
 
 			if (supabaseError) {
@@ -88,6 +88,26 @@ export const actions: Actions = {
 			console.error('addRating error', err);
 			throw error(500, {
 				message: 'Interal Server Error'
+			});
+		}
+	},
+	deleteRating: async ({ locals, params }) => {
+		if (!locals.session) {
+			return fail(401, {
+				message: 'Unauthorized'
+			});
+		}
+
+		const { error: supabaseError } = await locals.sb
+			.from('ratings')
+			.delete()
+			.eq('user_id', locals.session.user.id)
+			.eq('album_id', params.id);
+
+		if (supabaseError) {
+			console.error('deleteRating', supabaseError);
+			throw error(500, {
+				message: 'Internal server error'
 			});
 		}
 	}

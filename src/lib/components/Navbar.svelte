@@ -15,10 +15,6 @@
 			invalidate('app:album');
 			cancel();
 		}
-
-		return async ({ update }) => {
-			await update();
-		};
 	};
 </script>
 
