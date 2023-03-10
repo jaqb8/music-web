@@ -1,3 +1,5 @@
+import { assign } from 'xstate';
+
 export const states = {
 	initial: 'initial',
 	noComment: 'no_comment',
@@ -9,16 +11,22 @@ export const ratingCommentMachine = {
 	initial: states.initial,
 	states: {
 		initial: {
-			always: [{ target: states.noComment }, { target: states.commented, cond: 'hasComment' }]
+			always: [{ target: states.commented, cond: 'hasComment' }, { target: states.noComment }]
 		},
 		[states.noComment]: {
 			on: {
-				ADD_COMMENT: states.loading
+				ADD_COMMENT: {
+					target: states.loading,
+					actions: ['addComment']
+				}
 			}
 		},
 		[states.loading]: {
 			on: {
-				ADD_COMMENT_SUCCESS: states.commented,
+				ADD_COMMENT_SUCCESS: {
+					target: states.commented,
+					actions: ['invalidateUserRating']
+				},
 				DELETE_COMMENT_SUCCESS: states.noComment
 			}
 		},

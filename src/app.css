@@ -92,9 +92,10 @@ h6 {
 
 .rate {
 	display: flex;
+	justify-content: start;
 	flex-direction: row-reverse;
 	height: 46px;
-	padding: 0 10px;
+	padding: 0 15px;
 }
 
 .rate:not(:checked) > input {

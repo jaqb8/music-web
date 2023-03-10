@@ -2,22 +2,24 @@
 	import type { PageData } from './$types';
 	import MdDelete from 'svelte-icons/md/MdDelete.svelte';
 	import MdSend from 'svelte-icons/md/MdSend.svelte';
+	import MdRemove from 'svelte-icons/md/MdRemove.svelte';
 	import { clickOutside } from '$lib/shared';
 	import type { RatingObject } from '$lib/types';
 	import { enhance, type SubmitFunction } from '$app/forms';
 	import Spinner from '$lib/components/Spinner.svelte';
 	import { supabaseClient } from '$lib/supabase';
 	import { useMachine } from '@xstate/svelte';
-	import { ratingMachine, ratingStates } from '$lib/state';
+	import { ratingCommentStates, ratingMachine, ratingStates } from '$lib/state';
 	import { page } from '$app/stores';
 	import { error } from '@sveltejs/kit';
+	import toast from 'svelte-french-toast';
 
 	export let data: PageData;
 	$: ({ album } = data);
 
 	const { state, send } = useMachine(
 		ratingMachine.withContext({
-			session: data.session,
+			session: $page.data.session,
 			userRating: data.userRating
 		}),
 		{
@@ -58,6 +60,32 @@
 						});
 					}
 					send('DELETE_RATING_SUCCESS');
+				},
+				addComment: async ({ session, userRating }, { data }) => {
+					console.log('Adding comment');
+					const comment = data.get('comment') as RatingObject['comment'];
+
+					const { error: supabaseError } = await supabaseClient
+						.from('ratings')
+						.update({
+							comment
+						})
+						.eq('user_id', session?.user.id)
+						.eq('album_id', album.id);
+
+					if (supabaseError) {
+						console.error('albumView addComment', supabaseError);
+						send('ADD_COMMENT_ERROR');
+						throw error(500, {
+							message: 'Internal server error'
+						});
+					}
+
+					const userRatingUpdated = userRating.map((rating) => ({
+						...rating,
+						comment
+					}));
+					send('ADD_COMMENT_SUCCESS', { userRating: userRatingUpdated });
 				}
 			}
 		}
@@ -67,19 +95,24 @@
 		if (!$page.data.session) {
 			send('LOGOUT');
 		}
-		// console.log($state);
+		console.log($state);
 	}
 
 	const ratings: RatingObject['rating'][] = ['10', '9', '8', '7', '6', '5', '4', '3', '2', '1'];
+	let commentValue: string = '';
 
 	const onAddRating: SubmitFunction = async ({ cancel, data }) => {
 		send('ADD_RATING', { data });
 		cancel();
 	};
 
-	const onUpdateRating: SubmitFunction = async ({ cancel, action }) => {
+	const onUpdateRating: SubmitFunction = async ({ cancel, action, data }) => {
 		if (action.search.includes('addComment')) {
-			send('ADD_COMMENT');
+			if (data.get('comment')?.length === 0) {
+				toast('Please enter a comment');
+			} else {
+				send('ADD_COMMENT', { data });
+			}
 		}
 
 		if (action.search.includes('deleteRating')) {
@@ -90,81 +123,116 @@
 	};
 </script>
 
-<div
-	class="w-full h-[480px] md:h-[400px] absolute after:absolute z-0 bg-cover bg-center bg-no-repeat after:backdrop-blur-3xl after:h-full after:w-full"
-	style="background-image: url({album.images.at(0)?.url})"
-/>
-
-<header class="min-h-[400px] z-10 relative">
+{#if $state.matches(ratingStates.rated)}
 	<div
-		class="container px-[40px] mx-auto flex flex-col items-center justify-between md:flex-row-reverse"
+		class="w-full h-[690px] md:h-[400px] absolute after:absolute z-0 bg-cover bg-center bg-no-repeat after:backdrop-blur-3xl after:h-full after:w-full"
+		style="background-image: url({album.images.at(0)?.url})"
+	/>
+{/if}
+
+{#if $state.matches(ratingStates.noRate)}
+	<div
+		class="w-full h-[535px] md:h-[400px] absolute after:absolute z-0 bg-cover bg-center bg-no-repeat after:backdrop-blur-3xl after:h-full after:w-full"
+		style="background-image: url({album.images.at(0)?.url})"
+	/>
+{/if}
+
+<header class="min-h-[400px] z-10 relative mt-12">
+	<div
+		class="container px-[40px] mx-auto flex flex-col items-center md:items-start gap-y-10 justify-between md:flex-row-reverse"
 	>
-		<div class="mt-10">
+		<div class="">
 			<figure class="">
 				<img src={album.images.at(0)?.url} class="w-72 shadow-2xl rounded-box" alt="" />
 			</figure>
 		</div>
-		<div class="my-6 text-white flex flex-col">
-			<span class="badge badge-info badge-lg mb-2">{album.album_type.toUpperCase()}</span>
-			<h1 class="font-bold text-3xl">{album.name}</h1>
-			<p>{album.artists.map((artist) => artist.name).join(', ')}</p>
-
+		<div class="text-white flex flex-col min-w-[50%]">
+			<section>
+				<span class="badge badge-info badge-lg mb-2">{album.album_type.toUpperCase()}</span>
+				<h1 class="font-bold text-3xl">{album.name}</h1>
+				<p>{album.artists.map((artist) => artist.name).join(', ')}</p>
+			</section>
 			{#if [ratingStates.noRate, ratingStates.hasModalOpen].some($state.matches)}
-				<form action="?/addRating" method="POST" use:enhance={onAddRating}>
-					<div class="rate {!$state.context.session && 'rate-disabled'}">
-						{#each ratings as rating}
-							<input type="submit" id="star{rating}" value={rating} name="rating" />
-							<label for="star{rating}">{rating} stars</label>
-						{/each}
-					</div>
-				</form>
+				<div id="no_rate" class="md:mt-6">
+					<form action="?/addRating" method="POST" use:enhance={onAddRating}>
+						<div class="rate {!$state.context.session ? 'rate-disabled' : ''}">
+							{#each ratings as rating}
+								<input type="submit" id="star{rating}" value={rating} name="rating" />
+								<label for="star{rating}">{rating} stars</label>
+							{/each}
+						</div>
+					</form>
+				</div>
 			{/if}
 
-			{#if $state.matches(ratingStates.loading)}
-				<div class="mt-10 flex justify-end">
+			{#if [ratingStates.loading, { [ratingStates.rated]: ratingCommentStates.loading }].some($state.matches)}
+				<div id="loading" class="flex justify-center">
 					<Spinner />
 				</div>
 			{/if}
 
-			{#if $state.matches(ratingStates.rated)}
-				<form method="post" action="?/addComment" use:enhance={onUpdateRating}>
-					<div class="grid grid-rows-2 bg-secondary rounded-sm my-6 p-4 gap-5">
-						<div class="flex justify-between gap-4">
-							<div class="avatar">
-								<div class="w-16 rounded-full">
-									<img
-										src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg"
-										alt="avatar"
-									/>
-								</div>
-							</div>
-							<div class="flex-col">
-								<div class="opacity-70">Your rating is</div>
-								<div class="font-extrabold text-4xl">{$state.context.userRating.at(0)?.rating}</div>
-							</div>
-							<button
-								formaction="?/deleteRating"
-								class="w-8 ml-auto mr-2 text-info hover:text-error cursor-pointer"
-							>
-								<MdDelete />
-							</button>
-						</div>
-						<div class="form-control">
-							<div class="input-group">
-								<input
-									type="text"
-									placeholder="Share your opinion..."
-									class="input input-bordered"
-								/>
-								<button type="submit" class="btn btn-square btn-info hover:btn-success">
-									<div class="w-6">
-										<MdSend />
+			{#if [{ [ratingStates.rated]: ratingCommentStates.noComment }, { [ratingStates.rated]: ratingCommentStates.commented }].some($state.matches)}
+				<div id="rated" class="mt-6">
+					<form method="post" action="?/addComment" use:enhance={onUpdateRating}>
+						<div class="max-w-sm grid bg-secondary rounded-sm p-4 gap-5 items-center">
+							<div class="flex justify-between gap-4">
+								<div class="avatar">
+									<div class="w-16 h-16 rounded-full">
+										<img
+											src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg"
+											alt="avatar"
+										/>
 									</div>
+								</div>
+								<div class="flex-col">
+									<div class="opacity-70">Your rating is</div>
+									<div class="font-extrabold text-4xl">
+										{$state.context.userRating.at(0)?.rating}
+									</div>
+								</div>
+								<button
+									formaction="?/deleteRating"
+									class="w-8 ml-auto mr-2 text-info hover:text-error cursor-pointer"
+								>
+									<MdDelete />
 								</button>
 							</div>
+							{#if $state.matches({ [ratingStates.rated]: ratingCommentStates.noComment })}
+								<div class="form-control">
+									<div class="input-group">
+										<input
+											type="text"
+											name="comment"
+											bind:value={commentValue}
+											placeholder="Share your opinion..."
+											class="input input-bordered text-primary w-full"
+										/>
+										<button type="submit" class="btn btn-square btn-info hover:btn-success">
+											<div class="w-6">
+												<MdSend />
+											</div>
+										</button>
+									</div>
+								</div>
+							{/if}
+
+							{#if $state.matches({ [ratingStates.rated]: ratingCommentStates.commented })}
+								<div class="stats shadow">
+									<div class="stat">
+										<div class="stat-title truncate">
+											{$state.context.userRating.at(0)?.comment}
+										</div>
+										<div class="stat-desc">
+											{new Date($state.context.userRating.at(0)?.created_at ?? '').toLocaleString(
+												'pl-PL'
+											)}
+										</div>
+									</div>
+								</div>
+							{/if}
 						</div>
-					</div>
-				</form>
+					</form>
+				</div>
 			{/if}
 		</div>
 	</div>

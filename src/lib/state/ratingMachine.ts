@@ -41,7 +41,14 @@ export const ratingMachine = createMachine(
 							actions: ['addRating']
 						},
 						{ target: states.hasModalOpen }
-					]
+					],
+					LOGOUT: {
+						target: states.initial,
+						actions: assign(() => ({
+							session: null,
+							userRating: []
+						}))
+					}
 				}
 			},
 			[states.rated]: {
@@ -65,9 +72,7 @@ export const ratingMachine = createMachine(
 				on: {
 					ADD_RATING_SUCCESS: {
 						target: states.rated,
-						actions: assign<RatingContext, RatingEvent>({
-							userRating: (_, { userRating }) => userRating
-						})
+						actions: ['invalidateUserRating']
 					},
 					DELETE_RATING_SUCCESS: {
 						target: states.noRate,
@@ -94,6 +99,11 @@ export const ratingMachine = createMachine(
 				userRating.length > 0 &&
 				userRating.at(0)?.rating !== null &&
 				userRating.at(0)?.comment !== null
+		},
+		actions: {
+			invalidateUserRating: assign<RatingContext, RatingEvent>({
+				userRating: (_, { userRating }) => userRating
+			})
 		}
 	}
 );

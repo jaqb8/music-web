@@ -33,7 +33,7 @@ export interface Database {
         Row: {
           album_id: string
           comment: string | null
-          created_at: string | null
+          created_at: string
           id: number
           rating: Database["public"]["Enums"]["rating_enum"]
           user_id: string
@@ -41,7 +41,7 @@ export interface Database {
         Insert: {
           album_id: string
           comment?: string | null
-          created_at?: string | null
+          created_at?: string
           id?: number
           rating: Database["public"]["Enums"]["rating_enum"]
           user_id: string
@@ -49,7 +49,7 @@ export interface Database {
         Update: {
           album_id?: string
           comment?: string | null
-          created_at?: string | null
+          created_at?: string
           id?: number
           rating?: Database["public"]["Enums"]["rating_enum"]
           user_id?: string

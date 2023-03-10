@@ -110,5 +110,29 @@ export const actions: Actions = {
 				message: 'Internal server error'
 			});
 		}
+	},
+	addComment: async ({ request, locals, params }) => {
+		if (!locals.session) {
+			return fail(401, {
+				error: 'Unauthorized'
+			});
+		}
+		console.log(request);
+		const comment = Object.fromEntries(await request.formData()).comment as RatingObject['comment'];
+
+		const { error: supabaseError } = await locals.sb
+			.from('ratings')
+			.update({
+				comment
+			})
+			.eq('user_id', locals.session.user.id)
+			.eq('album_id', params.id);
+
+		if (supabaseError) {
+			console.error('deleteRating', supabaseError);
+			throw error(500, {
+				message: 'Internal server error'
+			});
+		}
 	}
 };
