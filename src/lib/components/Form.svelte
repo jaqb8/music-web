@@ -3,7 +3,6 @@
 
 	export let actionName: string;
 	export let submitFunction: SubmitFunction | undefined = undefined;
-	let submitEvent: Event;
 
 	const formEnhance = (form: HTMLFormElement) => {
 		if (submitFunction) {
@@ -12,6 +11,6 @@
 	};
 </script>
 
-<form on:submit={(e) => (submitEvent = e)} action="?/{actionName}" method="post" use:formEnhance>
-	<slot {submitEvent} />
+<form action="?/{actionName}" method="post" use:formEnhance>
+	<slot />
 </form>

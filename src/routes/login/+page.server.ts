@@ -21,7 +21,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 };
 
 export const actions: Actions = {
-	login: async ({ request, locals }) => {
+	login: async ({ request, locals, url }) => {
 		const formData = Object.fromEntries(await request.formData());
 
 		try {
@@ -54,6 +54,7 @@ export const actions: Actions = {
 			}
 		}
 
-		throw redirect(303, '/');
+		const location = url.searchParams.get('redirectTo') ?? '/';
+		throw redirect(303, location);
 	}
 };

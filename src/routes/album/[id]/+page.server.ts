@@ -1,7 +1,10 @@
 import { redis } from '$lib/server/redis';
-import type { PageServerLoad } from './$types';
+import type { RatingObject } from '$lib/types';
+import { error, fail } from '@sveltejs/kit';
+import type { Actions, PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ locals, params, setHeaders }) => {
+export const load: PageServerLoad = async ({ locals, params, setHeaders, depends }) => {
+	depends('app:album');
 	const CACHE_KEY = params.id;
 
 	const getAlbum = async (): Promise<SpotifyApi.SingleAlbumResponse> => {
@@ -29,7 +32,107 @@ export const load: PageServerLoad = async ({ locals, params, setHeaders }) => {
 		return album;
 	};
 
-	return {
-		album: getAlbum()
+	const getUserRating = async (): Promise<RatingObject[]> => {
+		if (!locals.session) {
+			return [];
+		}
+
+		try {
+			const { data, error: supabaseError } = await locals.sb
+				.from('ratings')
+				.select()
+				.eq('user_id', locals.session.user.id)
+				.eq('album_id', params.id);
+
+			if (supabaseError) {
+				throw supabaseError;
+			}
+
+			return data;
+		} catch (err) {
+			console.error('getUserRating error:', err);
+			throw error(500, {
+				message: 'Interal Server Error'
+			});
+		}
 	};
+
+	return {
+		album: getAlbum(),
+		userRating: getUserRating()
+	};
+};
+
+export const actions: Actions = {
+	addRating: async ({ request, locals, params }) => {
+		if (!locals.session) {
+			return fail(401, {
+				error: 'Unauthorized'
+			});
+		}
+
+		const rating = Object.fromEntries(await request.formData()).rating as RatingObject['rating'];
+
+		try {
+			const { error: supabaseError } = await locals.sb.from('ratings').insert({
+				user_id: locals.session.user.id,
+				album_id: params.id,
+				rating,
+				comment: null
+			});
+
+			if (supabaseError) {
+				throw supabaseError;
+			}
+		} catch (err) {
+			console.error('addRating error', err);
+			throw error(500, {
+				message: 'Interal Server Error'
+			});
+		}
+	},
+	deleteRating: async ({ locals, params }) => {
+		if (!locals.session) {
+			return fail(401, {
+				message: 'Unauthorized'
+			});
+		}
+
+		const { error: supabaseError } = await locals.sb
+			.from('ratings')
+			.delete()
+			.eq('user_id', locals.session.user.id)
+			.eq('album_id', params.id);
+
+		if (supabaseError) {
+			console.error('deleteRating', supabaseError);
+			throw error(500, {
+				message: 'Internal server error'
+			});
+		}
+	},
+	addComment: async ({ request, locals, params }) => {
+		if (!locals.session) {
+			return fail(401, {
+				error: 'Unauthorized'
+			});
+		}
+		console.log(request);
+		const comment = Object.fromEntries(await request.formData()).comment as RatingObject['comment'];
+
+		const { error: supabaseError } = await locals.sb
+			.from('ratings')
+			.update({
+				comment
+			})
+			.eq('user_id', locals.session.user.id)
+			.eq('album_id', params.id);
+
+		if (supabaseError) {
+			console.error('deleteRating', supabaseError);
+			throw error(500, {
+				message: 'Internal server error'
+			});
+		}
+	}
 };

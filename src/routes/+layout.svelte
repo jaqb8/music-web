@@ -2,7 +2,7 @@
 	import { register } from 'swiper/element/bundle';
 	import '../app.css';
 	import { supabaseClient } from '$lib/supabase';
-	import { invalidateAll } from '$app/navigation';
+	import { invalidate } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { Toaster } from 'svelte-french-toast';
 	import Navbar from '$lib/components/Navbar.svelte';
@@ -13,7 +13,7 @@
 		const {
 			data: { subscription }
 		} = supabaseClient.auth.onAuthStateChange(() => {
-			invalidateAll();
+			invalidate('app:session');
 		});
 
 		return () => {

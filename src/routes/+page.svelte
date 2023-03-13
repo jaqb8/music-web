@@ -1,21 +1,9 @@
 <script lang="ts">
-	import { enhance, type SubmitFunction } from '$app/forms';
-	import { supabaseClient } from '$lib/supabase';
 	import type { PageData } from './$types';
 	import { Slider } from '$lib/components';
 
 	export let data: PageData;
-	$: ({ albums, session } = data);
-
-	const submitLogout: SubmitFunction = async ({ cancel }) => {
-		const { error } = await supabaseClient.auth.signOut();
-
-		if (error) {
-			// TODO - handle error client side (e.g. in toast)
-			console.log(error);
-		}
-		cancel();
-	};
+	$: ({ albums } = data);
 </script>
 
 <header>
@@ -27,14 +15,4 @@
 <!-- Section Slider -->
 <section id="slider">
 	<Slider albums={albums.items} />
-</section>
-
-<!-- Section Temp logged in -->
-<section id="temp">
-	{#if session}
-		<p>Welcome, {session.user.email}!</p>
-		<form action="/logout" method="POST" use:enhance={submitLogout}>
-			<button type="submit" class="btn btn-primary">Logout</button>
-		</form>
-	{/if}
 </section>
