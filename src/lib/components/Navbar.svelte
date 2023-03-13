@@ -18,7 +18,7 @@
 	};
 </script>
 
-<nav class="navbar bg-base-300 text-primary">
+<nav class="navbar bg-secondary-focus text-secondary-content">
 	<div class="flex-1">
 		<a href="/" class="btn btn-ghost normal-case text-xl">Music Web</a>
 	</div>

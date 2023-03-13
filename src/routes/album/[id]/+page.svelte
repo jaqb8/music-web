@@ -123,37 +123,21 @@
 	};
 </script>
 
-{#if $state.matches(ratingStates.rated)}
+<header class="bg-base-300">
 	<div
-		class="w-full h-[690px] md:h-[400px] absolute after:absolute z-0 bg-cover bg-center bg-no-repeat after:backdrop-blur-3xl after:h-full after:w-full"
-		style="background-image: url({album.images.at(0)?.url})"
-	/>
-{/if}
-
-{#if $state.matches(ratingStates.noRate)}
-	<div
-		class="w-full h-[535px] md:h-[400px] absolute after:absolute z-0 bg-cover bg-center bg-no-repeat after:backdrop-blur-3xl after:h-full after:w-full"
-		style="background-image: url({album.images.at(0)?.url})"
-	/>
-{/if}
-
-<header class="min-h-[400px] z-10 relative mt-12">
-	<div
-		class="container px-[40px] mx-auto flex flex-col items-center md:items-start gap-y-10 justify-between md:flex-row-reverse"
+		class="container p-12 mx-auto flex flex-col items-center md:items-start gap-y-10 justify-between md:flex-row-reverse"
 	>
-		<div class="">
-			<figure class="">
-				<img src={album.images.at(0)?.url} class="w-72 shadow-2xl rounded-box" alt="" />
-			</figure>
-		</div>
-		<div class="text-white flex flex-col min-w-[50%]">
+		<figure>
+			<img src={album.images.at(0)?.url} class="w-72 shadow-2xl rounded-box" alt="" />
+		</figure>
+		<div class=" flex flex-col min-w-[50%]">
 			<section>
 				<span class="badge badge-info badge-lg mb-2">{album.album_type.toUpperCase()}</span>
 				<h1 class="font-bold text-3xl">{album.name}</h1>
 				<p>{album.artists.map((artist) => artist.name).join(', ')}</p>
 			</section>
 			{#if [ratingStates.noRate, ratingStates.hasModalOpen].some($state.matches)}
-				<div id="no_rate" class="md:mt-6">
+				<div id="no_rate" class="mt-6">
 					<form action="?/addRating" method="POST" use:enhance={onAddRating}>
 						<div class="rate {!$state.context.session ? 'rate-disabled' : ''}">
 							{#each ratings as rating}
@@ -172,7 +156,7 @@
 			{/if}
 
 			{#if [{ [ratingStates.rated]: ratingCommentStates.noComment }, { [ratingStates.rated]: ratingCommentStates.commented }].some($state.matches)}
-				<div id="rated" class="mt-6">
+				<div id="rated" class="text-white mt-6">
 					<form method="post" action="?/addComment" use:enhance={onUpdateRating}>
 						<div class="max-w-sm grid bg-secondary rounded-sm p-4 gap-5 items-center">
 							<div class="flex justify-between gap-4">

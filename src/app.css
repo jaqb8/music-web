@@ -92,7 +92,7 @@ h6 {
 
 .rate {
 	display: flex;
-	justify-content: start;
+	justify-content: flex-end;
 	flex-direction: row-reverse;
 	height: 46px;
 	padding: 0 15px;
@@ -109,7 +109,7 @@ h6 {
 	white-space: nowrap;
 	cursor: pointer;
 	font-size: 30px;
-	color: hsl(var(--b3));
+	color: hsl(var(--b1));
 }
 
 .rate:not(:checked) > label:before {
