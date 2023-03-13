@@ -133,8 +133,8 @@
 		<div class=" flex flex-col min-w-[50%]">
 			<section>
 				<span class="badge badge-info badge-lg mb-2">{album.album_type.toUpperCase()}</span>
-				<h1 class="font-bold text-3xl">{album.name}</h1>
-				<p>{album.artists.map((artist) => artist.name).join(', ')}</p>
+				<h1 class="font-bold text-5xl">{album.name}</h1>
+				<p class="text-2xl">{album.artists.map((artist) => artist.name).join(', ')}</p>
 			</section>
 			{#if [ratingStates.noRate, ratingStates.hasModalOpen].some($state.matches)}
 				<div id="no_rate" class="mt-6">
